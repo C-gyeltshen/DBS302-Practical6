@@ -40,4 +40,29 @@ To enable Access Control Lists (ACL) in Redis, we can choose between managing us
 1. Command line
 2. Configuration file  (redis.conf) 
 
-### **Using Command Line:**
+#### **Using Command Line:** Disabling the open default user and creating three distinct roles (Admin, Application, and Monitoring) with strictly defined password, key-pattern, and command-category restrictions.
+1. Open the Redis config file:
+    ```bash
+    sudo nano /etc/redis/redis.conf
+    ```
+2. Add the following ACL user definitions:
+    ```bash 
+    # Disable the default anonymous user (security best practice)
+    user default off
+
+    # Admin user: full access (DBA / Instructor only)
+    user admin on >adminStrongPwd ~* +@all
+
+    # Application user: can only read/write keys starting with "session:"
+    user app_user on >appStrongPwd ~session:* +get +set +del +expire +ttl +@connection
+
+    # Read-only monitoring user: can read all keys and run INFO
+    user monitoring on >monitorPwd ~* +@read +info +dbsize +lastsave +@connection
+    ```
+    ![5](./images/5.png)
+3. Save and exit the file.
+4. Restart the Redis server to apply changes:
+    ```bash
+    sudo systemctl restart redis
+    ``` 
+    ![1](./images/6.png)
